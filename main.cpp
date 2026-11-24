@@ -97,8 +97,8 @@ int main(){
         break;
         case 9: {
             programa = false;
-            cout<< DIVISION << endl << "\t\t" <<TITULO_PONTIFEST << endl << "\t\t\tDESPEDIDA"<< DIVISION<<endl;
-            cout<< "\t\tGracias por usar PONTIFEST. Hasta pronto!"<<endl;
+            cout<< DIVISION << endl << "\t\t" <<TITULO_PONTIFEST << endl << "\t\t\tDESPEDIDA" << endl << DIVISION << endl;
+            cout<< "\t\tGracias por usar PONTIFEST. Hasta pronto!" << endl;
         }
         break;
         default: {
@@ -248,30 +248,39 @@ void registrarCompra(Compra compras[], int &tam, Silla sillas [FILAS][COLUMNAS],
     getline(cin, nombre);
     cout<<"Ingrese su documento (sin espacios): "<<endl;
     cin>>documento;
-    cout<<"Ingrese su sexo (digite 'M' si es hombre, 'F' si es mujer): "<<endl;
-    cin>>sexo;
 
-    if (sexo != 'M' && sexo != 'F'){
-        cout<<"Ingrese un sexo valido (M o F)"<<endl;
-        return;
-    }
+    do {
+        cout<<"Ingrese su sexo (digite 'M' si es hombre, 'F' si es mujer): "<<endl;
+        cin>>sexo;
+
+        if (sexo != 'M' && sexo != 'F'){
+            cout<<"Ingrese un sexo valido (M o F)"<<endl;
+        }
+    }while(sexo!= 'M' && sexo != 'F');
+
 
     //solicitar localidad a la que desee comprar y cantidad de entradas
-    cout<<"¿En que localidad desea reservar? (digite 'V' para VIP, 'P' para preferencial, 'G' para general): "<<endl;
-    cin>>localidad;
+    cout<<"Costos por localidad: "<<endl;
+    cout<<"\tVIP $350 \n\tPreferencial $220 \n\tGeneral $120"<<endl;
+    do {
+        cout<<"¿En que localidad desea reservar? (digite 'V' para VIP, 'P' para preferencial, 'G' para general): "<<endl;
+        cin>>localidad;
 
-    if(localidad!='V' && localidad != 'P' && localidad != 'G') {
-        cout<<"Ingrese una localidad valida"<<endl;
-        return;
-    }
+        if(localidad!='V' && localidad != 'P' && localidad != 'G') {
+            cout<<"Ingrese una localidad valida"<<endl;
+        }
 
-    cout<<"¿Cuantas entradas desea reservar? (1 a 6)"<<endl;
-    cin>>entradas;
+    }while(localidad!='V' && localidad != 'P' && localidad != 'G');
 
-    if (entradas < 1 || entradas > 6) {
-        cout<<"Ingrese un numero entre 1 y 6"<<endl;
-        return;
-    }
+    do {
+        cout<<"¿Cuantas entradas desea reservar? (1 a 6)"<<endl;
+        cin>>entradas;
+
+        if (entradas < 1 || entradas > 6) {
+            cout<<"Ingrese un numero entre 1 y 6"<<endl;
+        }
+    }while(entradas < 1 || entradas > 6);
+
 
     if(localidad == 'V'){
         localidad_string = "VIP";
@@ -341,7 +350,7 @@ void registrarCompra(Compra compras[], int &tam, Silla sillas [FILAS][COLUMNAS],
         }
 
         if (!columna_encontrada) {
-            cout << "La columna ingresada no corresponde a un bloque diponible en la fila"<<
+            cout << "La columna ingresada no corresponde a un bloque diponible en la fila "<<
             fila_seleccionada<<endl;
         }
     } while (!columna_encontrada);
@@ -354,7 +363,7 @@ void registrarCompra(Compra compras[], int &tam, Silla sillas [FILAS][COLUMNAS],
 
     cout<<"Nombre del comprador: "<<nombre<<"\nNúmero de documento: "<<documento<<
     "\nSexo (M/F): "<<sexo<<"\nCantidad de entradas (1-6): "<<entradas<<
-    "\nLocalidad del asiento ( 1 = VIP $350, 2 = Preferencial $220, 3 = General $ 120): "<<localidad_string<<endl;
+    "\nLocalidad del asiento: "<<localidad_string<<endl;
     cout<<DIVISION<<endl;
 
     cout<<"Resumen de la compra: "<<endl;
@@ -366,7 +375,7 @@ void registrarCompra(Compra compras[], int &tam, Silla sillas [FILAS][COLUMNAS],
         if(i<entradas-1) cout<<", ";
     }
 
-    cout<<"\nValor total: $"<<precio_total<<"(mil pesos)"<<endl;
+    cout<<"\nValor total: $"<<precio_total*1000<<endl;
     char confirmacion;
 
     do{
@@ -435,10 +444,10 @@ void cancelarReserva(Compra compras[], int &tam, Silla sillas [FILAS][COLUMNAS])
     for (int i =0; i<tam; i++){
         if (documento == compras[i].documento){
             cout<<DIVISION<<endl;
-            cout<<compras[i].numeroCompra<<endl;
-            cout<<compras[i].tipoLocalidad<<endl;
-            cout<<compras[i].cantidadEntradas<<endl;
-            cout<<"Sillas asignadas: ";
+            cout<<"Numero de compra: "<<compras[i].numeroCompra<<endl;
+            cout<<"Localidad: "<<compras[i].tipoLocalidad<<endl;
+            cout<<"Cantidad de entradas: "<<compras[i].cantidadEntradas<<endl;
+            cout<<"Sillas asignadas: "<<endl;
 
             for (int j=0; j<FILAS; j++){
                 for(int k = 0; k<COLUMNAS; k++){
@@ -542,7 +551,11 @@ void cancelarReserva(Compra compras[], int &tam, Silla sillas [FILAS][COLUMNAS])
     cout<<"Compra cancelada. Sillas liberadas: "<<endl;
     for (int i =0; i<posicion; i++){
         cout<<sillas_auxiliar[i].fila<<sillas_auxiliar[i].columna;
-        if(i<posicion-1) cout<<", ";
+        if(i<posicion-1) {
+            cout<<", ";
+        } else {
+            cout<<"\n";
+        }
     }
 
     tam--; //restar 1 a la cantidad de compras en el arreglo
