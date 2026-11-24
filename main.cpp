@@ -2,6 +2,7 @@
 #include <sstream>
 using namespace std;
 
+//Constantes utilizadas con frecuencia en las funciones
 const int FILAS = 20;
 const int COLUMNAS = 6;
 const string DIVISION = "================================================================";
@@ -27,8 +28,13 @@ struct Silla{
 };
 
 void registrarCompra(Compra compras[], int &tam, Silla sillas [FILAS][COLUMNAS], int &siguienteCompra);
+void cancelarReserva(Compra compras[], int &tam, Silla sillas [FILAS][COLUMNAS]);
+void consultarDisponibilidad(Silla sillas[FILAS][COLUMNAS]);
 void buscarCompra(Compra compras[], int tam);
 void mostrarComprasPorLocalidad(Compra compras[], int tam);
+void consultarSillasOcupadas (Silla sillas[20][6]);
+void ventasLocalidad (Silla sillas[20][6]);
+void calcularIngresosTotales(Compra compras[], int tam);
 char numeroACaracter(int columna);
 int caracterANumero(char caracter);
 int buscarBloques(Silla sillas[FILAS][COLUMNAS], string localidad, int cantidad, int filaBloque[], int columnaBloque[]);
@@ -37,14 +43,72 @@ void subirComprasIniciales(Compra compras[], int &tam, Silla sillas[20][6], int 
 string obtenerLocalidad(int fila, char columna);
 
 int main(){
-
+    bool programa = true;
     Compra compras[100];
-    int tam = 0, siguienteCompra = 0;
+    int tam = 0, siguienteCompra = 100;
     Silla sillas[FILAS][COLUMNAS];
 
-    registrarCompra(compras, tam, sillas, siguienteCompra);
-    return 0;
+    inicializarEscenario(sillas);
+    subirComprasIniciales(compras, tam, sillas, siguienteCompra);
 
+    int caso;
+
+    while (programa == true){
+        cout<< DIVISION << endl << "\t\t" <<TITULO_PONTIFEST << endl << DIVISION;
+        cout<< "\n\tPor favor seleccione la opcion que desee\n\n";
+        cout<< "1. Registrar compra de entradas \n2. Cancelar reserva \n3. Consultar disponibilidad por fila\n4. Buscar compras \n5. Mostrar compras agrupadas por localidad\n";
+        cout<< "6. Consultar sillas ocupadas \n7. Total de entradas vendidas por localidad \n8. Calcular ingresos totales del evento \n9. Salir\n";
+        cout<< DIVISION<<"\nSeleccione una opcion (1-9): ";
+
+        cin>> caso;
+        cin.ignore(1000, '\n');
+        switch (caso){
+        case 1: {
+            registrarCompra(compras, tam, sillas, siguienteCompra);
+        }
+        break;
+        case 2: {
+            cancelarReserva(compras, tam, sillas);
+        }
+        break;
+        case 3: {
+            consultarDisponibilidad(sillas);
+        }
+        break;
+        case 4: {
+            buscarCompra(compras, tam);
+        }
+        break;
+        case 5: {
+            mostrarComprasPorLocalidad(compras, tam);
+        }
+        break;
+        case 6: {
+            consultarSillasOcupadas(sillas);
+        }
+        break;
+        case 7: {
+            ventasLocalidad(sillas);
+        }
+        break;
+        case 8: {
+            calcularIngresosTotales(compras, tam);
+        }
+        break;
+        case 9: {
+            programa = false;
+            cout<< DIVISION << endl << "\t\t" <<TITULO_PONTIFEST << endl << "\t\t\tDESPEDIDA"<< DIVISION<<endl;
+            cout<< "\t\tGracias por usar PONTIFEST. Hasta pronto!"<<endl;
+        }
+        break;
+        default: {
+            cout<<"Opcion no valida, intente de nuevo...\n"<<endl;
+        }
+        break;
+        }
+
+    }
+    return 0;
 }
 
 //Funciones auxiliares
@@ -116,7 +180,7 @@ void subirComprasIniciales(Compra compras[], int &tam, Silla sillas[20][6], int 
         return;
     }
 
-    string nombres[5] = {"Thomas Diaz", "Juan Miguel Cadena", "Lorenzo Mendez", "Samuel Salazar", "Juan Carlos Gonzalez"};
+    string nombres[5] = {"Thomas Diaz", "Juan Miguel Cadena", "Lorenzo Mendez", "Samuel Salazar", "Luis Chicaiza"};
     string documentos[5] = {"10000001", "10000002", "10000003", "10000004", "10000005"};
     string localidades[5] = {"VIP", "Preferencial", "Preferencial", "General", "General"};
 
@@ -228,7 +292,7 @@ void registrarCompra(Compra compras[], int &tam, Silla sillas [FILAS][COLUMNAS],
     }
 
     //Mostrar en pantalla las sillas disponibles
-    cout<<"Sillas encontradas para la localidad "<<localidad;
+    cout<<"Sillas encontradas para la localidad "<<localidad_string<<endl;
 
     for (int i = 0; i < bloques_encontrados; i++){
         cout<<"Fila "<<filas[i]<<", columnas "<<numeroACaracter(columnas[i])<<"-"
@@ -289,8 +353,8 @@ void registrarCompra(Compra compras[], int &tam, Silla sillas [FILAS][COLUMNAS],
     cout<<DIVISION<<endl;
 
     cout<<"Nombre del comprador: "<<nombre<<"\nNúmero de documento: "<<documento<<
-    "\nSexo (M/F): "<<sexo<<"Cantidad de entradas (1-6): "<<entradas<<
-    "Localidad del asiento ( 1 = VIP $350, 2 = Preferencial $220, 3 = General $ 120): "<<localidad_string<<endl;
+    "\nSexo (M/F): "<<sexo<<"\nCantidad de entradas (1-6): "<<entradas<<
+    "\nLocalidad del asiento ( 1 = VIP $350, 2 = Preferencial $220, 3 = General $ 120): "<<localidad_string<<endl;
     cout<<DIVISION<<endl;
 
     cout<<"Resumen de la compra: "<<endl;
@@ -318,8 +382,8 @@ void registrarCompra(Compra compras[], int &tam, Silla sillas [FILAS][COLUMNAS],
                 '-'<<numeroACaracter(columna_inicial+entradas - 1)<<'('<<localidad_string<<')'<<endl;
 
                 for (int i = 0; i<entradas; i++){
-                    sillas[fila_seleccionada-1][columna_inicial+1].estado = false;
-                    sillas[fila_seleccionada-1][columna_inicial+1].numeroCompra = siguienteCompra;
+                    sillas[fila_seleccionada-1][columna_inicial+i].estado = true;
+                    sillas[fila_seleccionada-1][columna_inicial+i].numeroCompra = siguienteCompra;
                 }
 
                 compras[tam].numeroCompra = siguienteCompra;
@@ -344,7 +408,181 @@ void registrarCompra(Compra compras[], int &tam, Silla sillas [FILAS][COLUMNAS],
                 break;
 
         }
-    }while(confirmacion!='N');
+    }while(confirmacion!='N' && confirmacion != 'S');
+}
+
+//Funcion opcion 2 del menu
+
+void cancelarReserva(Compra compras[], int &tam, Silla sillas [FILAS][COLUMNAS]){
+    string documento, nombre, localidad;
+    int entradas, valor_total;
+    bool reserva_encontrada = false;
+
+    if (tam == 0){
+        cout<<"No hay compras registradas"<<endl;
+        return;
+    }
+
+    //Solicitar num de documento
+    cout<<"Ingrese su numero de documento: "<<endl;
+    cin>>documento;
+
+
+    //Buscar todas las reservas registradas con el documento
+    cout<<"Reserva/s encontradas con el documento "<<documento<<": "<<endl;
+
+    //Mostrar las reservas por pantalla
+    for (int i =0; i<tam; i++){
+        if (documento == compras[i].documento){
+            cout<<DIVISION<<endl;
+            cout<<compras[i].numeroCompra<<endl;
+            cout<<compras[i].tipoLocalidad<<endl;
+            cout<<compras[i].cantidadEntradas<<endl;
+            cout<<"Sillas asignadas: ";
+
+            for (int j=0; j<FILAS; j++){
+                for(int k = 0; k<COLUMNAS; k++){
+                    if (sillas[j][k].numeroCompra == compras[i].numeroCompra){
+                        cout<<sillas[j][k].fila<<sillas[j][k].columna<<endl;
+                    }
+                }
+            }
+
+            cout<<"Valor total: "<<compras[i].valorTotal<<endl;
+            cout<<DIVISION<<endl;
+            reserva_encontrada = true;
+        }
+    }
+
+    if (!reserva_encontrada) {
+        cout<<"No se encontraron reservas para el documento "<<documento<<endl;
+        return;
+    }
+
+    bool compra_encontrada = false;
+    int compra_a_cancelar;
+
+    //Do while hasta que ingrese una compra valida
+    do {
+        //Solicitar numero de compra a cancelar
+        cout<<"Ingrese el numero de compra que desee cancelar: "<<endl;
+        cin>>compra_a_cancelar;
+
+        for (int i = 0; i < tam; i++){
+            if (compra_a_cancelar == compras[i].numeroCompra && compras[i].documento == documento){
+                nombre = compras[i].nombreComprador;
+                entradas = compras[i].cantidadEntradas;
+                localidad = compras[i].tipoLocalidad;
+                valor_total = compras[i].valorTotal;
+
+                compra_encontrada = true;
+                break;
+            }
+        }
+
+        if (!compra_encontrada) cout<<"Ingrese un numero valido"<<endl;
+
+    }while(!compra_encontrada);
+
+    //Pedir confirmacion
+    cout<<DIVISION<<endl;
+    cout<<TITULO_PONTIFEST<<endl;
+    cout<<"Cancelar reserva"<<endl;
+    cout<<DIVISION<<endl;
+
+    cout<<"Numero de compra a cancelar: "<<compra_a_cancelar<<endl;
+    cout<<"Compra:  "<<compra_a_cancelar<<" | "<<nombre<<" | "<<entradas<<" entradas";
+    cout<<" | "<<localidad<<" | "<<"$"<<valor_total<<endl;
+
+    //Do while hasta que digite S o N
+    char respuesta;
+    do {
+        cout<<"Confirmar cancelacion (S/N):"<<endl;
+        cin>>respuesta;
+
+        if(respuesta != 'S' && respuesta != 'N') {
+            cout<<"Ingrese 'S' para confirmar, 'N' para rechazar"<<endl;
+        }
+    }while(respuesta != 'S' && respuesta != 'N');
+
+    if (respuesta == 'N') {
+        cout<<DIVISION<<endl;
+        cout<<"Cancelacion abortada. "<<endl;
+        cout<<DIVISION<<endl;
+
+        return;
+    }
+
+
+    Silla sillas_auxiliar[120]; // arreglo para guardar las sillas con el numero de compra
+    int posicion = 0;
+    //Cambiar las sillas con ese numero de compra a true
+    for(int i=0; i<FILAS; i++){
+        for(int j = 0; j<COLUMNAS; j++){
+            if (sillas[i][j].numeroCompra == compra_a_cancelar){
+                sillas[i][j].numeroCompra = -1;
+                sillas[i][j].estado = false;
+                sillas_auxiliar[posicion] = sillas[i][j];
+                posicion++;
+            }
+        }
+    }
+
+    //Eliminar la compra del arreglo de Compras (Mover las compras de i+1 hasta tam-1, a la izquierda)
+    for (int i = 0; i < tam; i++){
+        if (compras[i].numeroCompra == compra_a_cancelar){
+            for (int j = i; j < tam-1; j++){
+                compras[j] = compras[j+1];
+            }
+            break;
+        }
+    }
+
+    cout<<DIVISION<<endl;
+    cout<<"Compra cancelada. Sillas liberadas: "<<endl;
+    for (int i =0; i<posicion; i++){
+        cout<<sillas_auxiliar[i].fila<<sillas_auxiliar[i].columna;
+        if(i<posicion-1) cout<<", ";
+    }
+
+    tam--; //restar 1 a la cantidad de compras en el arreglo
+
+}
+
+//Funcion opcion 3 del menu
+
+void consultarDisponibilidad(Silla sillas[FILAS][COLUMNAS]){
+    int fila, ocupadas = 0, disponibles = 0;
+    cout<<DIVISION<<endl;
+    cout<<"\t\t"<<TITULO_PONTIFEST<<endl;
+    cout<<"Consultar disponibilidad por fila"<<endl;
+    cout<<DIVISION<<endl;
+
+    cout<<"Ingrese la fila en la que desee ver el estado de las sillas (1-20): "<<endl;
+    cin>>fila;
+
+    if (fila < 1 || fila > 20){
+        cout<<"Fila invalida"<<endl;
+        return;
+    }
+
+    cout<<"==="<<"Fila "<<fila<<"==="<<endl;
+
+    for (int i = 0; i<COLUMNAS; i++){
+        cout<<numeroACaracter(i)<<" | "<<sillas[fila-1][i].localidad<<" | ";
+
+        if(sillas[fila-1][i].estado) {
+            cout<<"Ocupada"<<endl;
+            ocupadas++;
+        } else{
+            cout<<"Disponible"<<endl;
+            disponibles++;
+        }
+    }
+
+    cout<<"Disponibles: "<<disponibles<<" | Ocupadas: "<<ocupadas<<endl;
+    cout<<DIVISION<<endl;
+
 }
 
 //Funcion opcion 4 del menu
@@ -379,7 +617,7 @@ void buscarCompra(Compra compras[], int tam){
 
     getline(cin, dato_compra);
 
-    for(int i = 0; i < tam; i++){ //aca se recorre las compras y muetsra cuales coinciden
+    for(int i = 0; i < tam; i++){ //aca se recorre las compras y muestra cuales coinciden
         bool coincidencia = false;
 
         if(opcion == "1" && compras[i].nombreComprador == dato_compra){
@@ -434,4 +672,56 @@ void mostrarComprasPorLocalidad(Compra compras[], int tam){
         }
     }
     cout<<DIVISION<<endl;
+}
+
+//Funcion opcion 6 del menu
+void consultarSillasOcupadas (Silla sillas[20][6]){
+    int total = 0;
+
+    cout<< DIVISION << endl << "\t\t" <<TITULO_PONTIFEST << "\n\t\t\tSillas Ocupadas\n"<< endl << DIVISION<<endl;
+    cout<< "Fila | Col | Localidad | N. Compra\n";
+    for (int i = 0; i < 20; i++){
+        for (int j = 0; j < 6; j++){
+            if (sillas[i][j].estado == true){
+                cout<< i+1 << " | "<< numeroACaracter(j) << " | "<< sillas[i][j].localidad << " | "<< sillas[i][j].numeroCompra << endl;
+                total++;
+            }
+        }
+    }
+    cout<< DIVISION << endl;
+    cout<< "Total de sillas ocupadas: " << total << endl;
+}
+
+//Funcion opcion 7 del menu
+void ventasLocalidad (Silla sillas[20][6]){
+    int vip = 0, pref = 0, gen = 0;
+
+    cout<< DIVISION << endl << "\t\t" <<TITULO_PONTIFEST << "\n\t\tEntradas vendidas por localidad\n" << endl << DIVISION<<endl;
+    for (int i = 0; i < 20; i++){
+        for (int j = 0; j < 6; j++){
+            if (sillas[i][j].estado == true){
+                if (sillas[i][j].localidad == "VIP"){
+                    vip++;
+                }
+                if (sillas[i][j].localidad == "Preferencial"){
+                    pref++;
+                }
+                if (sillas[i][j].localidad == "General"){
+                    gen++;
+                }
+            }
+
+        }
+    }
+    cout<< "VIP: " << vip << "\tPreferencial: " << pref << "\tGeneral: " << gen << "\tTotal: " << vip + pref + gen << endl;
+}
+
+//Funcion opcion 8 del menu
+void calcularIngresosTotales(Compra compras[], int tam){
+    cout<< DIVISION << endl << "\t\t" <<TITULO_PONTIFEST << "\n\t\tIngresos totales del evento\n" << endl << DIVISION<<endl;
+    int valorTotal = 0;
+    for (int i = 0; i < tam; i++){
+        valorTotal += (compras[i].valorTotal*1000);
+    }
+    cout<< "Total recaudado: $" << valorTotal << "COP\n";
 }
